@@ -8,7 +8,7 @@ public class Configuration {
 
     private final String UEBERGANG_DELIMITER = "11";
 
-    public Map<Integer, List<Procedure>> list = new HashMap<>();
+    private Map<Integer, List<Procedure>> list = new HashMap<>();
 
     public Configuration(String args) {
         if (args == null) {
@@ -28,6 +28,10 @@ public class Configuration {
                 list.put(procedure.oldState, procedures);
             }
         });
+    }
+
+    public List<Procedure> get(Integer key) {
+        return list.get(key);
     }
 
 }
