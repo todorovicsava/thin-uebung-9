@@ -89,7 +89,7 @@ public class UniversalTM {
     private void print(int state, StringBuilder band, int index, int counter) {
         var p1 = "State: " + (state < 10 ? (" " + state) : state) + "; ";
         var p2 = "Band: ";
-        var failSafeString = "0000000000000000" + band.toString() + "0000000000000000";
+        var failSafeString = "_______________" + band.toString() + "_______________";
         p2 = failSafeString.substring(Math.max(index,0), index+15);
         p2 += "|";
         p2 += failSafeString.substring(index+15, index+30);
