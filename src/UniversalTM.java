@@ -7,57 +7,69 @@ public class UniversalTM {
 
     public UniversalTM() { }
 
-    public void run(String input, Mode mode) {
-        int     currentState = 0;
+    public void run(String args, Mode mode) {
+        int     currentState = 1;
         boolean eof          = false;
         boolean stuck        = false;
-        int     currentPos   = 0;
+        int     index        = 0;
+        int     counter      = 0;
 
-        //read configuration first
-        String        configValue = Arrays.asList(input.split(TM_DELIMITER, 2)).get(0);
-        Configuration config      = new Configuration(configValue);
-        currentPos = configValue.length() + TM_DELIMITER.length();
-
-        StringBuilder band    = new StringBuilder(input);
-        int           counter = 0;
-
-        //System.out.println("Band " + band);
+        List<String>  splitConfigAndInput = Arrays.asList(args.split(TM_DELIMITER, 2));
+        Configuration config              = new Configuration(splitConfigAndInput.get(0));
+        StringBuilder band                = new StringBuilder(splitConfigAndInput.get(1));
 
         if (mode == Mode.Step) {
-            var p1 = "State:" + currentState + "; ";
-            var p2 = "Band: " + band.substring(currentPos > 15 ? currentPos - 15 : 0, currentPos);
-            var p3 = "|";
-            var p4 = band.substring(currentPos, currentPos + 15 < band.length() ? currentPos + 15 : band.length()) + "; ";
-            var p5 = "Counter: " + counter + ";";
-            System.out.println(p1 + p2 + p3 + p4 + p5);
+            print(currentState, band, index, counter);
         }
 
         //process input
         while (!eof && !stuck) {
-            char            c           = band.charAt(currentPos);
+            char c = ' ';
+            try {
+                c = band.charAt(index);
+            }
+            catch (IndexOutOfBoundsException e) {
+                //ignore
+            }
             List<Procedure> procs       = config.get(currentState);
             boolean         noProcValid = true;
             if (procs != null) {
                 for (var proc : procs) {
                     if (proc.acceptedInput.equals(c)) {
-                        band.replace(currentPos, currentPos, proc.output.toString());
+
+                        if (proc.output.equals(' ') && !(index < 0) && !band.toString().isEmpty()) {
+                            band.deleteCharAt(index);
+                        }
+                        else if (proc.output.equals(' ')) {
+                            band = new StringBuilder(' ' + band.toString());
+                            if (proc.direction == Direction.Right) {
+                                index += 2;
+                            }
+                            else {
+                                index -= 2;
+                            }
+                        }
+                        else {
+                            if (index == band.length()) {
+                                band.append(proc.output);
+                            }
+                            else {
+                                band.setCharAt(index, proc.output);
+                            }
+                            if (proc.direction == Direction.Right) {
+                                index++;
+                            }
+                            else {
+                                index--;
+                            }
+                        }
+
                         currentState = proc.newState;
                         counter++;
                         noProcValid = false;
-                        if (proc.direction == Direction.Right) {
-                            currentPos++;
-                        }
-                        else {
-                            currentPos--;
-                        }
 
                         if (mode == Mode.Step) {
-                            var p1 = "State:" + currentState + "; ";
-                            var p2 = "Band: " + band.substring(currentPos > 15 ? currentPos - 15 : 0, currentPos);
-                            var p3 = "|";
-                            var p4 = band.substring(currentPos, currentPos + 15 < band.length() ? currentPos + 15 : band.length() - 1) + "; ";
-                            var p5 = "Counter: " + counter + ";";
-                            System.out.println(p1 + p2 + p3 + p4 + p5);
+                            print(currentState, band, index, counter);
                         }
 
                         break;
@@ -67,19 +79,30 @@ public class UniversalTM {
             if (noProcValid) {
                 stuck = true;
             }
-            else if (currentPos >= band.length() - 1) {
-                eof = true;
-            }
 
-            if (eof || stuck && mode == Mode.Run) {
-                var p1 = "State:" + currentState + "; ";
-                var p2 = "Band: " + band.substring(currentPos > 15 ? currentPos - 15 : 0, currentPos);
-                var p3 = "|";
-                var p4 = band.substring(currentPos, currentPos + 15 < band.length() ? currentPos + 15 : band.length() - 1) + "; ";
-                var p5 = "Counter: " + counter + ";";
-                System.out.println(p1 + p2 + p3 + p4 + p5);
+            if (stuck && mode == Mode.Run) {
+                print(currentState, band, index, counter);
             }
         }
+    }
+
+    private void print(int state, StringBuilder band, int index, int counter) {
+        var p1 = "State: " + (state < 10 ? (" " + state) : state) + "; ";
+        var p2 = "Band: ";
+        Integer charsBeforeHeader = index - 15 > 0 ? index - 15 : index < 0 ? 0 : index;
+        for(int i=0; i < 15 - charsBeforeHeader; i++) {
+            p2 += "_";
+        }
+        p2 += band.substring(Math.max(index, 0)- charsBeforeHeader, index < 0 ? 0: index);
+        p2 += "|";
+        Integer charsAfterHeader = band.length() - index > 15 ? 15 : band.length() - index;
+        p2 += band.substring(Math.min(index, 0), index + charsAfterHeader);
+        for(int i=0; i < 15 - charsAfterHeader; i++) {
+            p2 += "_";
+        }
+
+        var p3 = " Counter: " + counter + ";";
+        System.out.println(p1 + p2 + p3);
     }
 
     public enum Mode {Run, Step}
