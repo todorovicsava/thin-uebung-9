@@ -89,18 +89,10 @@ public class UniversalTM {
     private void print(int state, StringBuilder band, int index, int counter) {
         var p1 = "State: " + (state < 10 ? (" " + state) : state) + "; ";
         var p2 = "Band: ";
-        Integer charsBeforeHeader = index - 15 > 0 ? index - 15 : index < 0 ? 0 : index;
-        for(int i=0; i < 15 - charsBeforeHeader; i++) {
-            p2 += "_";
-        }
-        p2 += band.substring(Math.max(index, 0)- charsBeforeHeader, index < 0 ? 0: index);
+        var failSafeString = "0000000000000000" + band.toString() + "0000000000000000";
+        p2 = failSafeString.substring(Math.max(index,0), index+15);
         p2 += "|";
-        Integer charsAfterHeader = band.length() - index > 15 ? 15 : band.length() - index;
-        p2 += band.substring(Math.min(index, 0), index + charsAfterHeader);
-        for(int i=0; i < 15 - charsAfterHeader; i++) {
-            p2 += "_";
-        }
-
+        p2 += failSafeString.substring(index+15, index+30);
         var p3 = " Counter: " + counter + ";";
         System.out.println(p1 + p2 + p3);
     }
