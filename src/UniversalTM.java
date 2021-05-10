@@ -18,6 +18,19 @@ public class UniversalTM {
         Configuration config              = new Configuration(splitConfigAndInput.get(0));
         StringBuilder band                = new StringBuilder(splitConfigAndInput.get(1));
 
+        if (mode == Mode.Debug) {
+            List<String> numbers = Arrays.asList(splitConfigAndInput.get(1).split("1"));
+            if (numbers.size() == 0) {
+                System.out.println("Debug: 0*0");
+            }
+            else if (numbers.size() == 1) {
+                System.out.println("Debug: 0*" +numbers.get(0).length());
+            }
+            else if (numbers.size() == 2) {
+                System.out.println("Debug: " + numbers.get(0).length() + "*" + numbers.get(1).length());
+            }
+        }
+
         if (mode == Mode.Step) {
             print(currentState, band, index, counter);
         }
@@ -80,7 +93,17 @@ public class UniversalTM {
                 stuck = true;
             }
 
-            if (stuck && mode == Mode.Run) {
+            if (stuck && mode == Mode.Debug) {
+                int count = 0;
+                String result = band.toString();
+                for(int i = 0; i < result.length(); i++) {
+                    if(result.charAt(i) == '0') {
+                        count++;
+                    }
+                }
+                System.out.println("Debug: = " + count );
+            }
+            else if (stuck && mode == Mode.Run) {
                 print(currentState, band, index, counter);
             }
         }
@@ -97,6 +120,6 @@ public class UniversalTM {
         System.out.println(p1 + p2 + p3);
     }
 
-    public enum Mode {Run, Step}
+    public enum Mode {Run, Step, Debug}
 
 }
