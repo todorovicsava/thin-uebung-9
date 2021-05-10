@@ -118,6 +118,15 @@ public class UniversalTM {
         p2 += failSafeString.substring(index+15, index+30);
         var p3 = " Counter: " + counter + ";";
         System.out.println(p1 + p2 + p3);
+        int count = 0;
+        if (state == 2) {
+            for (char c : band.toString().toCharArray()) {
+                if (c == '0') {
+                    count++;
+                }
+            }
+            System.out.println(String.format("Result as decimal number: %d", count));
+        }
     }
 
     public enum Mode {Run, Step, Debug}
